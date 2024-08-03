@@ -1,41 +1,39 @@
 import pyautogui
 import time
 import threading
-import random as rand
+import keyboard
 
-def get_center():
-    resolution = pyautogui.size()
-    return (resolution.width // 2, resolution.height // 2)
+def check_key_press(stop_event):
+    while not stop_event.is_set():
+        if keyboard.is_pressed('q'):
+            print("You pressed 'q'.")
+            stop_event.set()
+            break
+        time.sleep(0.1)
 
-def get_pixel_color(x, y):
-    screen = pyautogui.screenshot()
-    pixel_color = screen.getpixel(x, y);
-    return pixel_color
-
+def fish(stop_event):
+    while not stop_event.is_set():
+        # Cast Line
+        # Wait for exclamation mark
+        # Reel Line
+        # Continue only after fish is secured i.e. yellow bit on bottom left is gone
+        time.sleep(1)  # Placeholder for fishing logic
 
 def main():
+    print('Press "q" to end the program.')
 
-    pixel_location = get_center()
+    stop_event = threading.Event()
 
-    running = True
-    while running:
-        if get_pixel_color(pixel_location) == (255, 255, 255):
-            print(f"The pixel at center is white")
-            pyautogui.moveTo(get_center())
+    io_thread = threading.Thread(target=check_key_press, args=(stop_event,))
+    fishing_thread = threading.Thread(target=fish, args=(stop_event,))
 
-            number_of_times = 20
+    io_thread.start()
+    fishing_thread.start()
 
-            # Reel in
-            for i in range(1, number_of_times):
-                pyautogui.click()
-                time.sleep(0.5 + rand.random())
+    io_thread.join()
+    fishing_thread.join()
 
-        # Cast rod
-        pyautogui.click()
-
-        # TODO: Add fail safe to end program via key press
-        # TODO: Multi threaded approach, one thread to listen to mouse inputs and one to listen to screen inputs
-
+    print("Program ended.q")
 
 
 if __name__=='__main__':
